@@ -1,0 +1,154 @@
+# IPEDS 서베이 코드 및 설명
+# 이 파일은 IPEDS에서 제공하는 다양한 서베이의 코드와 설명을 정의합니다.
+# 출처: https://nces.ed.gov/ipeds/use-the-data
+
+surveys:
+  # 기관 정보
+  HD:
+    name: "Directory Information"
+    description: "기관 디렉토리 정보 (위치, 주소, 연락처 등)"
+    category: "institutional"
+    priority: 1
+
+  IC:
+    name: "Institutional Characteristics"
+    description: "기관 특성 (학위 수여, 캘린더, 입학 정책 등)"
+    category: "institutional"
+    priority: 1
+    variants:
+      - "IC"      # 기본
+      - "IC_AY"   # Academic Year
+
+  # 등록 정보
+  EF:
+    name: "Fall Enrollment"
+    description: "가을학기 등록 정보 (학생 수, 인구통계 등)"
+    category: "enrollment"
+    priority: 1
+    variants:
+      - "EF"
+      - "EFA"     # Part A
+      - "EFB"     # Part B
+      - "EFC"     # Part C
+      - "EFD"     # Part D
+
+  EFFY:
+    name: "12-month Enrollment"
+    description: "12개월 등록 정보"
+    category: "enrollment"
+    priority: 2
+
+  # 재정 정보
+  F:
+    name: "Finance"
+    description: "재정 정보 (수입, 지출, 자산 등)"
+    category: "finance"
+    priority: 1
+    variants:
+      - "F1A"     # Public institutions
+      - "F2"      # Private not-for-profit
+      - "F3"      # Private for-profit
+
+  # 학비 및 재정 지원
+  IC_AY:
+    name: "Charges and Net Price"
+    description: "학비 및 순비용 정보"
+    category: "finance"
+    priority: 2
+
+  SFA:
+    name: "Student Financial Aid"
+    description: "학자금 지원 정보"
+    category: "finance"
+    priority: 2
+
+  # 졸업 및 성과
+  GR:
+    name: "Graduation Rates"
+    description: "졸업률 정보"
+    category: "outcomes"
+    priority: 1
+    variants:
+      - "GR"
+      - "GR200"   # 200% graduation rates
+      - "GR_L2"   # Less than 2-year
+
+  OM:
+    name: "Outcome Measures"
+    description: "성과 측정 (8년 졸업률 등)"
+    category: "outcomes"
+    priority: 2
+
+  # 입학 정보
+  ADM:
+    name: "Admissions"
+    description: "입학 정보 (지원자, 합격자, 등록자 수)"
+    category: "admissions"
+    priority: 2
+
+  # 인적자원
+  SAL:
+    name: "Salaries"
+    description: "급여 정보 (교수진 및 직원)"
+    category: "human_resources"
+    priority: 2
+    variants:
+      - "SAL_A"   # Instruction/research staff
+      - "SAL_NIS" # Non-instructional staff
+
+  S:
+    name: "Employees by Assigned Position"
+    description: "직원 정보 (직위별)"
+    category: "human_resources"
+    priority: 3
+
+  # 학업 라이브러리
+  AL:
+    name: "Academic Libraries"
+    description: "학술 도서관 정보"
+    category: "resources"
+    priority: 3
+
+  # 완성도
+  C:
+    name: "Completions"
+    description: "학위 수여 정보 (전공별, 인종별)"
+    category: "completions"
+    priority: 2
+    variants:
+      - "C_A"     # Award levels
+      - "C_B"     # CIP codes
+
+# 서베이 카테고리 설명
+categories:
+  institutional:
+    description: "기관 특성 및 기본 정보"
+    priority: 1
+
+  enrollment:
+    description: "학생 등록 정보"
+    priority: 1
+
+  finance:
+    description: "재정 및 학비 정보"
+    priority: 1
+
+  outcomes:
+    description: "졸업률 및 성과"
+    priority: 2
+
+  admissions:
+    description: "입학 정보"
+    priority: 2
+
+  human_resources:
+    description: "인적자원 (교수진, 직원)"
+    priority: 3
+
+  resources:
+    description: "학술 자원 (도서관 등)"
+    priority: 3
+
+  completions:
+    description: "학위 수여 정보"
+    priority: 2

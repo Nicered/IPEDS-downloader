@@ -1,0 +1,28 @@
+# Core dependencies for IPEDS Downloader
+# HTTP 클라이언트 및 재시도 로직
+requests>=2.31.0
+
+# YAML 설정 파일 파싱
+pyyaml>=6.0.1
+
+# 진행 상황 표시
+tqdm>=4.66.0
+
+# 데이터 검증
+jsonschema>=4.20.0
+
+# CLI 인자 파싱 (Python 3.7+ 표준 라이브러리이지만 명시)
+# argparse는 표준 라이브러리이므로 별도 설치 불필요
+
+# 개발 및 테스트 도구
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# 코드 품질 도구
+black>=23.12.0
+flake8>=6.1.0
+mypy>=1.7.0
+
+# 로깅 향상 (선택사항)
+colorlog>=6.8.0

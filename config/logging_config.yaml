@@ -1,0 +1,125 @@
+# 로깅 설정 파일
+# Python logging 모듈을 위한 상세 설정
+
+version: 1
+disable_existing_loggers: false
+
+# 로그 포맷 정의
+formatters:
+  # 상세 포맷 (파일용)
+  detailed:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)d - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+  # 간단한 포맷 (콘솔용)
+  simple:
+    format: "%(asctime)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+  # 컬러 포맷 (콘솔용, colorlog 사용 시)
+  colored:
+    format: "%(log_color)s%(asctime)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    class: "colorlog.ColoredFormatter"
+    log_colors:
+      DEBUG: "cyan"
+      INFO: "green"
+      WARNING: "yellow"
+      ERROR: "red"
+      CRITICAL: "bold_red"
+
+# 핸들러 정의
+handlers:
+  # 콘솔 출력
+  console:
+    class: "logging.StreamHandler"
+    level: "INFO"
+    formatter: "simple"
+    stream: "ext://sys.stdout"
+
+  # 전체 로그 파일
+  file_all:
+    class: "logging.handlers.RotatingFileHandler"
+    level: "DEBUG"
+    formatter: "detailed"
+    filename: "logs/ipeds_downloader.log"
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: "utf-8"
+
+  # 에러 로그 파일
+  file_error:
+    class: "logging.handlers.RotatingFileHandler"
+    level: "ERROR"
+    formatter: "detailed"
+    filename: "logs/ipeds_error.log"
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: "utf-8"
+
+  # 다운로드 로그 파일
+  file_download:
+    class: "logging.handlers.RotatingFileHandler"
+    level: "INFO"
+    formatter: "detailed"
+    filename: "logs/download.log"
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    encoding: "utf-8"
+
+# 로거 정의
+loggers:
+  # 다운로더 로거
+  ipeds_downloader:
+    level: "DEBUG"
+    handlers:
+      - console
+      - file_all
+      - file_error
+    propagate: false
+
+  # 클라이언트 로거
+  ipeds_client:
+    level: "DEBUG"
+    handlers:
+      - console
+      - file_all
+      - file_download
+    propagate: false
+
+  # 스토리지 로거
+  ipeds_storage:
+    level: "DEBUG"
+    handlers:
+      - console
+      - file_all
+    propagate: false
+
+  # 메타데이터 로거
+  ipeds_metadata:
+    level: "DEBUG"
+    handlers:
+      - console
+      - file_all
+    propagate: false
+
+  # 외부 라이브러리 로거 (urllib3, requests 등)
+  urllib3:
+    level: "WARNING"
+    handlers:
+      - file_all
+    propagate: false
+
+  requests:
+    level: "WARNING"
+    handlers:
+      - file_all
+    propagate: false
+
+# 루트 로거
+root:
+  level: "DEBUG"
+  handlers:
+    - console
+    - file_all
+    - file_error
