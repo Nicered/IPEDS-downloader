@@ -40,15 +40,23 @@ IPEDS-downloader/
 │       │   ├── __init__.py
 │       │   └── config_loader.py         # 설정 로더
 │       │
-│       └── utils/                # 유틸리티 모듈
+│       ├── utils/                # 유틸리티 모듈
+│       │   ├── __init__.py
+│       │   ├── logger.py                # 로깅 유틸리티
+│       │   ├── validators.py            # 검증 함수
+│       │   ├── helpers.py               # 헬퍼 함수
+│       │   └── year_detector.py         # 최신 연도 자동 감지
+│       │
+│       └── cli/                  # CLI 모듈
 │           ├── __init__.py
-│           ├── logger.py                # 로깅 유틸리티
-│           ├── validators.py            # 검증 함수
-│           └── helpers.py               # 헬퍼 함수
+│           ├── download_cmd.py          # download 명령어
+│           ├── verify_cmd.py            # verify 명령어
+│           ├── extract_cmd.py           # extract 명령어
+│           ├── metadata_cmd.py          # metadata 명령어
+│           └── list_cmd.py              # list 명령어
 │
 ├── scripts/                      # 실행 스크립트
-│   ├── download_ipeds.py         # 메인 실행 스크립트
-│   └── verify_downloads.py       # 다운로드 검증 스크립트
+│   └── ipeds_cli.py              # 통합 CLI 진입점
 │
 ├── config/                       # 설정 파일
 │   ├── downloader_config.yaml    # 다운로더 설정
@@ -198,6 +206,43 @@ IPEDS-downloader/
 - 문자열 처리 함수
 - 진행률 계산 함수
 
+**year_detector.py**
+- 최신 IPEDS 데이터 연도 자동 감지
+- IPEDS 웹사이트 탐색 (또는 시도 기반)
+- 연도 범위 유효성 검증
+- 현재 연도 기반 추정
+
+### 2.6 cli 모듈 (`src/modules/cli/`)
+
+**책임:** CLI 서브커맨드 구현
+
+#### 주요 모듈
+
+**download_cmd.py**
+- `download` 명령어 구현
+- 다운로드 관련 옵션 처리
+- 다운로더 모듈 호출
+
+**verify_cmd.py**
+- `verify` 명령어 구현
+- 파일 무결성 검증
+- 다운로드 완료 여부 확인
+
+**extract_cmd.py**
+- `extract` 명령어 구현
+- ZIP 파일 일괄 압축 해제
+- 파일 관리자 호출
+
+**metadata_cmd.py**
+- `metadata` 명령어 구현
+- 메타데이터 조회 및 관리
+- 통계 표시
+
+**list_cmd.py**
+- `list` 명령어 구현
+- 다운로드 가능한 파일 목록
+- 다운로드된 파일 목록
+
 ## 3. 구현 단계별 계획
 
 ### Phase 01-A: 기본 다운로더 구현 (1주차)
@@ -252,14 +297,21 @@ IPEDS-downloader/
 - [ ] 다운로드 워크플로우 조정
 - [ ] 설정 기반 다운로드 실행
 
-**9. 실행 스크립트 작성**
-- [ ] `scripts/download_ipeds.py` 작성
-- [ ] CLI 인터페이스 구현 (argparse)
-- [ ] 기본 명령어 구현
+**9. CLI 모듈 구현**
+- [ ] `cli/download_cmd.py` 구현
+- [ ] `cli/list_cmd.py` 구현
+- [ ] `scripts/ipeds_cli.py` 통합 진입점 작성
+- [ ] argparse 기반 서브커맨드 구조
 
-**10. 초기 테스트**
+**10. 연도 감지 유틸리티 구현**
+- [ ] `utils/year_detector.py` 구현
+- [ ] 최신 연도 자동 감지 로직
+- [ ] 연도 범위 검증 함수
+
+**11. 초기 테스트**
 - [ ] 소규모 데이터셋으로 다운로드 테스트
 - [ ] 에러 처리 확인
+- [ ] CLI 명령어 테스트
 
 #### 산출물
 - 동작하는 기본 다운로더
@@ -304,13 +356,20 @@ IPEDS-downloader/
 - [ ] 서베이 변형 처리 (예: EF_A, EF_B)
 - [ ] 우선순위 기반 다운로드
 
-**7. 다운로드 검증 스크립트**
-- [ ] `scripts/verify_downloads.py` 작성
+**7. CLI 확장 구현**
+- [ ] `cli/verify_cmd.py` 구현
+- [ ] `cli/extract_cmd.py` 구현
+- [ ] `cli/metadata_cmd.py` 구현
 - [ ] 다운로드 완료 확인
 - [ ] 파일 무결성 일괄 검증
 - [ ] 누락 파일 리포트
 
-**8. 에러 처리 개선**
+**8. 최신 데이터 지원**
+- [ ] `year_detector.py` 개선
+- [ ] "latest" 키워드 지원
+- [ ] 자동 업데이트 확인
+
+**9. 에러 처리 개선**
 - [ ] 상세한 에러 메시지
 - [ ] 에러 로그 파일 생성
 - [ ] 에러 복구 전략
@@ -319,6 +378,8 @@ IPEDS-downloader/
 - 안정적이고 편리한 다운로더
 - 전체 서베이 다운로드 가능
 - 중단/재개 지원
+- 모듈별 CLI 접근 가능
+- 최신 데이터 자동 감지
 
 ### Phase 01-C: 테스트 및 최적화 (3주차)
 
@@ -820,7 +881,7 @@ download:
   # 다운로드 연도 범위
   years:
     start: 2013
-    end: 2023
+    end: "latest"     # "latest" 사용 시 최신 연도 자동 감지, 또는 2023 등 특정 연도
 
   # 다운로드할 서베이 (우선순위별)
   surveys:
@@ -1029,7 +1090,335 @@ root:
   handlers: [console, file]
 ```
 
-## 6. 구현 시작 순서
+## 6. CLI 인터페이스 설계
+
+### 6.1 전체 CLI 구조
+
+**통합 진입점**: `scripts/ipeds_cli.py`
+
+```bash
+python scripts/ipeds_cli.py <command> [options]
+```
+
+### 6.2 주요 서브커맨드
+
+#### download - 데이터 다운로드
+```bash
+# 모든 데이터 다운로드
+python scripts/ipeds_cli.py download --all
+
+# 특정 연도 다운로드
+python scripts/ipeds_cli.py download --year 2022
+
+# 연도 범위 다운로드
+python scripts/ipeds_cli.py download --start-year 2020 --end-year 2023
+
+# 특정 서베이 다운로드
+python scripts/ipeds_cli.py download --survey HD IC EF
+
+# 특정 서베이 + 연도 조합
+python scripts/ipeds_cli.py download --survey HD --year 2022
+
+# 우선순위 기반 다운로드
+python scripts/ipeds_cli.py download --priority 1
+
+# 최신 데이터만 다운로드
+python scripts/ipeds_cli.py download --latest
+
+# 설정 파일 지정
+python scripts/ipeds_cli.py download --all --config custom_config.yaml
+
+# 자동 압축 해제 포함
+python scripts/ipeds_cli.py download --all --extract
+```
+
+#### verify - 다운로드 검증
+```bash
+# 모든 다운로드 파일 검증
+python scripts/ipeds_cli.py verify
+
+# 특정 연도 검증
+python scripts/ipeds_cli.py verify --year 2022
+
+# 누락 파일 리포트
+python scripts/ipeds_cli.py verify --report-missing
+
+# 손상 파일 재다운로드
+python scripts/ipeds_cli.py verify --fix
+```
+
+#### extract - 압축 해제
+```bash
+# 모든 ZIP 파일 압축 해제
+python scripts/ipeds_cli.py extract --all
+
+# 특정 연도 압축 해제
+python scripts/ipeds_cli.py extract --year 2022
+
+# 특정 파일 압축 해제
+python scripts/ipeds_cli.py extract --file data/raw/2022/HD2022.zip
+```
+
+#### metadata - 메타데이터 관리
+```bash
+# 다운로드 통계 조회
+python scripts/ipeds_cli.py metadata stats
+
+# 파일 레지스트리 조회
+python scripts/ipeds_cli.py metadata list
+
+# 특정 파일 정보
+python scripts/ipeds_cli.py metadata info HD2022.zip
+
+# 다운로드 로그 조회
+python scripts/ipeds_cli.py metadata logs --date 2025-11-11
+
+# 메타데이터 초기화 (재구축)
+python scripts/ipeds_cli.py metadata rebuild
+```
+
+#### list - 목록 조회
+```bash
+# 다운로드 가능한 모든 서베이 조회
+python scripts/ipeds_cli.py list surveys
+
+# 다운로드 가능한 연도 조회
+python scripts/ipeds_cli.py list years
+
+# 특정 연도의 파일 목록
+python scripts/ipeds_cli.py list files --year 2022
+
+# 다운로드된 파일 목록
+python scripts/ipeds_cli.py list downloaded
+
+# 대기 중인 다운로드 목록
+python scripts/ipeds_cli.py list pending
+
+# 실패한 다운로드 목록
+python scripts/ipeds_cli.py list failed
+```
+
+### 6.3 공통 옵션
+
+모든 명령어에서 사용 가능한 옵션:
+```bash
+--config PATH         # 설정 파일 경로
+--verbose, -v         # 상세 출력
+--quiet, -q           # 최소 출력
+--log-level LEVEL     # 로그 레벨 (DEBUG, INFO, WARNING, ERROR)
+--help, -h            # 도움말
+```
+
+### 6.4 CLI 구현 구조
+
+**ipeds_cli.py (메인 진입점)**
+```python
+import argparse
+from src.modules.cli import (
+    download_cmd,
+    verify_cmd,
+    extract_cmd,
+    metadata_cmd,
+    list_cmd
+)
+
+def main():
+    """메인 CLI 진입점"""
+    parser = argparse.ArgumentParser(
+        description="IPEDS 데이터 다운로더 CLI"
+    )
+
+    subparsers = parser.add_subparsers(dest='command', help='사용 가능한 명령어')
+
+    # download 서브커맨드
+    download_cmd.setup_parser(subparsers)
+
+    # verify 서브커맨드
+    verify_cmd.setup_parser(subparsers)
+
+    # extract 서브커맨드
+    extract_cmd.setup_parser(subparsers)
+
+    # metadata 서브커맨드
+    metadata_cmd.setup_parser(subparsers)
+
+    # list 서브커맨드
+    list_cmd.setup_parser(subparsers)
+
+    args = parser.parse_args()
+
+    # 명령어 실행
+    if args.command == 'download':
+        download_cmd.execute(args)
+    elif args.command == 'verify':
+        verify_cmd.execute(args)
+    elif args.command == 'extract':
+        extract_cmd.execute(args)
+    elif args.command == 'metadata':
+        metadata_cmd.execute(args)
+    elif args.command == 'list':
+        list_cmd.execute(args)
+    else:
+        parser.print_help()
+
+if __name__ == '__main__':
+    main()
+```
+
+**download_cmd.py (예시)**
+```python
+"""download 명령어 구현"""
+
+def setup_parser(subparsers):
+    """download 서브파서 설정"""
+    parser = subparsers.add_parser('download', help='IPEDS 데이터 다운로드')
+
+    parser.add_argument('--all', action='store_true', help='모든 데이터 다운로드')
+    parser.add_argument('--year', type=int, help='특정 연도 다운로드')
+    parser.add_argument('--start-year', type=int, help='시작 연도')
+    parser.add_argument('--end-year', type=int, help='종료 연도')
+    parser.add_argument('--survey', nargs='+', help='서베이 코드 목록')
+    parser.add_argument('--priority', type=int, help='우선순위 (1, 2, 3)')
+    parser.add_argument('--latest', action='store_true', help='최신 데이터만')
+    parser.add_argument('--extract', action='store_true', help='자동 압축 해제')
+    parser.add_argument('--config', help='설정 파일 경로')
+
+    return parser
+
+def execute(args):
+    """download 명령어 실행"""
+    from src.modules.downloader import IPEDSDownloader
+    from src.modules.utils.year_detector import detect_latest_year
+
+    # 설정 로드
+    config_path = args.config or 'config/downloader_config.yaml'
+    downloader = IPEDSDownloader(config_path)
+
+    # 최신 연도 감지
+    if args.latest:
+        latest_year = detect_latest_year()
+        print(f"최신 연도 감지: {latest_year}")
+        downloader.download_year(latest_year)
+
+    # 전체 다운로드
+    elif args.all:
+        downloader.download_all()
+
+    # 특정 연도
+    elif args.year:
+        downloader.download_year(args.year)
+
+    # 연도 범위
+    elif args.start_year and args.end_year:
+        for year in range(args.start_year, args.end_year + 1):
+            downloader.download_year(year)
+
+    # 특정 서베이
+    elif args.survey:
+        for survey_code in args.survey:
+            if args.year:
+                downloader.download_survey(survey_code, args.year)
+            else:
+                # 설정된 모든 연도
+                downloader.download_survey_all_years(survey_code)
+
+    else:
+        print("다운로드 옵션을 지정해주세요. --help로 도움말을 확인하세요.")
+```
+
+### 6.5 YearDetector 클래스 설계
+
+**year_detector.py**
+```python
+"""최신 IPEDS 데이터 연도 자동 감지"""
+
+import requests
+from datetime import datetime
+
+def detect_latest_year(base_url: str = "http://nces.ed.gov/ipeds/datacenter/data/") -> int:
+    """
+    최신 IPEDS 데이터 연도 감지
+
+    전략:
+    1. 현재 연도부터 역순으로 HD 파일 존재 확인
+    2. 존재하는 가장 최근 연도 반환
+
+    Args:
+        base_url: IPEDS 기본 URL
+
+    Returns:
+        최신 연도
+    """
+    current_year = datetime.now().year
+
+    # 현재 연도부터 3년 전까지 확인
+    for year in range(current_year, current_year - 4, -1):
+        test_url = f"{base_url}HD{year}.zip"
+
+        try:
+            response = requests.head(test_url, timeout=5)
+            if response.status_code == 200:
+                return year
+        except requests.RequestException:
+            continue
+
+    # 감지 실패 시 현재 연도 - 1 반환
+    return current_year - 1
+
+def validate_year_range(start_year: int, end_year: int) -> bool:
+    """
+    연도 범위 유효성 검증
+
+    Args:
+        start_year: 시작 연도
+        end_year: 종료 연도
+
+    Returns:
+        유효 여부
+    """
+    if start_year > end_year:
+        return False
+
+    if start_year < 1980:  # IPEDS 데이터 최소 연도
+        return False
+
+    current_year = datetime.now().year
+    if end_year > current_year:
+        return False
+
+    return True
+```
+
+### 6.6 사용 예시
+
+#### 전체 워크플로우
+```bash
+# 1. 사용 가능한 서베이 확인
+python scripts/ipeds_cli.py list surveys
+
+# 2. 최신 데이터 다운로드
+python scripts/ipeds_cli.py download --latest --survey HD IC EF
+
+# 3. 다운로드 검증
+python scripts/ipeds_cli.py verify --year 2023
+
+# 4. 압축 해제
+python scripts/ipeds_cli.py extract --year 2023
+
+# 5. 통계 확인
+python scripts/ipeds_cli.py metadata stats
+```
+
+#### 대량 다운로드
+```bash
+# 모든 데이터 다운로드 (최신까지)
+python scripts/ipeds_cli.py download --all --verbose
+
+# 우선순위 1 서베이만 (핵심 데이터)
+python scripts/ipeds_cli.py download --priority 1 --start-year 2013 --end-year latest
+```
+
+## 7. 구현 시작 순서
 
 ### 단계별 구현 순서 (권장)
 
@@ -1095,7 +1484,7 @@ root:
 2. ✅ 에러 시나리오 테스트
 3. ✅ 전체 워크플로우 검증
 
-## 7. 의존성 (requirements.txt)
+## 8. 의존성 (requirements.txt)
 
 ```
 # HTTP 클라이언트
@@ -1123,7 +1512,7 @@ mypy>=1.5.0
 # python-json-logger>=2.0.7
 ```
 
-## 8. 성공 기준
+## 9. 성공 기준
 
 ### Phase 01-A 완료 기준
 - ✅ 기본 다운로더 동작
@@ -1131,6 +1520,7 @@ mypy>=1.5.0
 - ✅ 최근 1-2년 데이터 다운로드 가능
 - ✅ 메타데이터 기록 동작
 - ✅ 기본 에러 처리
+- ✅ CLI 기본 명령어 (download, list) 동작
 
 ### Phase 01-B 완료 기준
 - ✅ 모든 우선순위 서베이 지원
@@ -1138,6 +1528,8 @@ mypy>=1.5.0
 - ✅ 진행률 표시
 - ✅ 중단/재개 기능
 - ✅ 파일 무결성 검증
+- ✅ 전체 CLI 서브커맨드 구현
+- ✅ 최신 연도 자동 감지 기능
 
 ### Phase 01-C 완료 기준
 - ✅ 단위 테스트 80% 이상 커버리지
@@ -1153,7 +1545,7 @@ mypy>=1.5.0
 - ✅ 포괄적인 테스트 및 문서
 - ✅ Phase 02로 넘어갈 준비 완료
 
-## 9. 리스크 및 대응 방안
+## 10. 리스크 및 대응 방안
 
 ### 리스크 1: IPEDS 웹사이트 구조 변경
 **대응:**
@@ -1179,7 +1571,7 @@ mypy>=1.5.0
 - 에러 로깅
 - 수동 처리 가이드
 
-## 10. 다음 Phase 준비사항
+## 11. 다음 Phase 준비사항
 
 Phase 02 (데이터 변환)을 위한 준비:
 - 다운로드된 모든 파일 목록
