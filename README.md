@@ -23,6 +23,60 @@ IPEDS(Integrated Postsecondary Education Data System) 데이터를 자동으로 
 pip install -r requirements.txt
 ```
 
+## ⚠️ 중요: IPEDS 다운로드 제약사항
+
+**IPEDS 서버는 직접 URL 다운로드를 차단합니다.**
+
+### 현상
+
+```bash
+# 직접 다운로드 시도 시
+$ curl https://nces.ed.gov/ipeds/datacenter/data/HD2023.zip
+# 결과: 403 Forbidden - Access denied
+```
+
+### 원인
+
+- IPEDS Data Center는 웹사이트를 통한 세션 기반 다운로드만 허용
+- 직접 URL 접근은 모두 차단됨
+- HEAD 요청도 403 Forbidden 반환
+
+### 해결 방법
+
+**방법 1: 브라우저 자동화 (Selenium/Playwright)**
+
+Urban Institute의 [ipeds-scraper](https://github.com/UrbanInstitute/ipeds-scraper)처럼 브라우저 자동화 사용:
+
+```python
+# Selenium으로 웹사이트 접속 → 로그인 → 파일 다운로드
+# 현재 코드에 Playwright 추가 예정
+```
+
+**방법 2: 수동 다운로드 후 처리**
+
+1. [IPEDS Data Center](https://nces.ed.gov/ipeds/datacenter/DataFiles.aspx)에서 수동 다운로드
+2. `data/raw/{year}/` 디렉토리에 저장
+3. 나머지 기능(검증, 압축해제 등) 사용:
+
+```bash
+python scripts/ipeds_cli.py verify
+python scripts/ipeds_cli.py extract
+python scripts/ipeds_cli.py metadata stats
+```
+
+**방법 3: IPEDS Access Database**
+
+- [IPEDS Access Databases](https://nces.ed.gov/ipeds/use-the-data/download-access-database)
+- 연도별 전체 데이터를 Access DB 형식으로 다운로드 가능
+- CSV로 변환 후 사용
+
+### 현재 상태
+
+- ✅ 모든 모듈 구현 완료 (99%)
+- ✅ CLI 인터페이스 완성
+- ✅ 재시도 로직, 메타데이터 관리, 파일 검증 모두 작동
+- ⏳ 브라우저 자동화 추가 예정
+
 ## 사용법
 
 ### 기본 사용법
