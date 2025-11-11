@@ -120,22 +120,22 @@ class DownloadManager:
 
             return task
 
-        # 파일 존재 여부 확인
-        if not self.client.check_file_exists(url):
-            logger.warning(f"파일을 찾을 수 없습니다: {url}")
-            task.status = "FAILED"
-            task.error_message = "파일을 찾을 수 없습니다 (404)"
-
-            # 메타데이터에 로그 기록
-            self.metadata_manager.log_download(
-                survey=survey,
-                year=year,
-                url=url,
-                status="FAILED",
-                error_message=task.error_message
-            )
-
-            return task
+        # 파일 존재 여부 확인 (IPEDS 서버가 HEAD 요청을 차단하므로 비활성화)
+        # if not self.client.check_file_exists(url):
+        #     logger.warning(f"파일을 찾을 수 없습니다: {url}")
+        #     task.status = "FAILED"
+        #     task.error_message = "파일을 찾을 수 없습니다 (404)"
+        #
+        #     # 메타데이터에 로그 기록
+        #     self.metadata_manager.log_download(
+        #         survey=survey,
+        #         year=year,
+        #         url=url,
+        #         status="FAILED",
+        #         error_message=task.error_message
+        #     )
+        #
+        #     return task
 
         # 다운로드 시도
         try:
